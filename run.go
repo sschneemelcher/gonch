@@ -1,12 +1,9 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 func runCommand(words []string) (string, string) {
@@ -30,71 +27,36 @@ func runCommand(words []string) (string, string) {
 	// Setup pipes so we can get the output of the command
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
-		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		fmt.Println(err)
+		// If we get an error from exec, we want to have this in stderr too
+		return "", err.Error()
 	}
 
 	// Read the output of the command
 	stdout, err := ioutil.ReadAll(stdoutPipe)
 	if err != nil {
-		fmt.Println(err)
+		os.Exit(1)
+		// fmt.Println(err)
 	}
 	stderr, err := ioutil.ReadAll(stderrPipe)
 	if err != nil {
-		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	err = cmd.Wait()
 	if err != nil {
-		fmt.Println(err)
+		// This prints `Exit status 1` etc..
+		// fmt.Println(err)
 	}
 
 	return string(stdout), string(stderr)
-}
-
-func parseInput(input string) []string {
-	input = strings.TrimSpace(input)
-	words := strings.Fields(input)
-
-	return words
-}
-
-func prompt(r *bufio.Reader) []string {
-	fmt.Print("$ ")
-	line, err := r.ReadString('\n')
-	if err != nil {
-		fmt.Println("Cannot read from stdin")
-		os.Exit(1)
-	}
-
-	return parseInput(line)
-}
-
-func main() {
-	reader := bufio.NewReader(os.Stdin)
-	for true {
-
-		// Print prompt, read line from user input and split it into words
-		words := prompt(reader)
-
-		stdout, stderr := runCommand(words)
-
-		// Print command output
-		if len(stdout) > 0 {
-			fmt.Print(stdout)
-		}
-		if len(stderr) > 0 {
-			fmt.Print(stderr)
-		}
-
-	}
 }
