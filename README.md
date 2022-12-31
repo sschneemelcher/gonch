@@ -1,2 +1,2 @@
 # gonch
-Go shell
+Just a simple shell in Go
