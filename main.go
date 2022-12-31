@@ -9,25 +9,33 @@ import (
 	"strings"
 )
 
+func prompt(r *bufio.Reader) []string {
+	fmt.Print("$ ")
+	line, err := r.ReadString('\n')
+	if err != nil {
+		fmt.Println("Cannot read from stdin")
+		os.Exit(1)
+	}
+	line = strings.TrimSpace(line)
+	words := strings.Fields(line)
+
+	return words
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	for true {
 
 		// Print prompt, read line from user input and split it into words
-		fmt.Print("$ ")
-		line, err := reader.ReadString('\n')
-		line = strings.TrimSpace(line)
-		words := strings.Fields(line)
+		words := prompt(reader)
 
-		var args string
 		var cmd *exec.Cmd
 
 		// Depending on the amount of words, we might need to use args
 		if len(words) == 1 {
 			cmd = exec.Command(words[0])
 		} else if len(words) > 1 {
-			args = strings.Join(words[1:], " ")
-			cmd = exec.Command(words[0], args)
+			cmd = exec.Command(words[0], words[1:]...)
 		} else {
 			continue
 		}
