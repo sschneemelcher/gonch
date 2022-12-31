@@ -16,6 +16,7 @@ func main() {
 		// Print prompt, read line from user input and split it into words
 		fmt.Print("$ ")
 		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
 		words := strings.Fields(line)
 
 		var args string
@@ -29,6 +30,11 @@ func main() {
 			cmd = exec.Command(words[0], args)
 		} else {
 			continue
+		}
+
+		// Check for builtins
+		if words[0] == "exit" {
+			os.Exit(0)
 		}
 
 		// Setup pipes so we can get the output of the command
